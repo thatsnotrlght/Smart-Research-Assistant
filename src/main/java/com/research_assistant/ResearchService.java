@@ -4,15 +4,23 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class ResearchService {
-	private String geminiApiURL;
+	private String geminiApiUrl;
 	@Value("${gemini.api.url}")
 	
 	private String geminiApiKey;
 	@Value("${gemini.api.key}")
 	
+	private final WebClient webClient;
+	
+	
+	public ResearchService(WebClient.Builder webClientBuilder) {
+		this.webClient = webClientBuilder.build(); // This helps get instance of Web Client
+	}
+
 	public String processContent(ResearchRequest request) {
 		// Build the prompt
 		String prompt = buildPrompt(request);
@@ -21,14 +29,33 @@ public class ResearchService {
 		Map<String, Object> requestBody = Map.of( // Format of JSON Request Body 
 				"contents", new Object[] {
 						Map.of("parts", new Object[] {
-								Map.of("text", prompt)
-						})
-					}
-				);
+							Map.of("text", prompt)
+					})
+				}
+			);
+		
+			// Making the actual API call using WebClient
+		String response = webClient.post()
+				.uri(geminiApiUrl + geminiApiKey)
+				.bodyValue(requestBody)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
 		// Parse the response
 		// Return response
+		
+		return extractTextFromResponse(response);
 	}
 	
+	private String extractTextFromResponse(String response) {
+		try {
+			
+		} catch (Exception e) {
+			return "Error Parsing: " + e.getMessage();
+		}
+		return response;
+	}
+
 	// Crafting entire prompt
 	private String buildPrompt(ResearchRequest request) {
 		StringBuilder prompt = new StringBuilder();
