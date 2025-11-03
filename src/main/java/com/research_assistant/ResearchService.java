@@ -11,18 +11,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class ResearchService {
 	private String geminiApiUrl;
-	@Value("${gemini.api.url}")
-	
 	private String geminiApiKey;
-	@Value("${gemini.api.key}")
-	
 	private final WebClient webClient;
 	private final ObjectMapper objectMapper;
 	
-	
-	public ResearchService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
+	public ResearchService(WebClient.Builder webClientBuilder, 
+			ObjectMapper objectMapper, 
+			@Value("${gemini.api.url}") String geminiApiUrl, 	
+			@Value("${gemini.api.key}") String geminiApiKey) {
+		
 		this.webClient = webClientBuilder.build(); // This helps get instance of Web Client
 		this.objectMapper = new ObjectMapper();
+		this.geminiApiKey = geminiApiKey;
+		this.geminiApiUrl = geminiApiUrl;
 	}
 
 	public String processContent(ResearchRequest request) {
