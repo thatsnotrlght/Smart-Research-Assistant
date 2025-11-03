@@ -12,9 +12,12 @@ import lombok.AllArgsConstructor;
 @RestController
 @RequestMapping("/api/research") // Mapping all endpoints defined in Controller to this URL
 @CrossOrigin(origins = "*") // Allows accessing all endpoints in this controller from frontend
-@AllArgsConstructor
 public class ResearchController {
 	private final ResearchService researchService;
+	
+	public ResearchController(ResearchService researchService) {
+        this.researchService = researchService;
+    }
 	
 	@PostMapping("/process")
 	public ResponseEntity<String> processContent(@RequestBody ResearchRequest request) {

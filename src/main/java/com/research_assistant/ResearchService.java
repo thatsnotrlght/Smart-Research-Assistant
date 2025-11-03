@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class ResearchService {
 	private String geminiApiUrl;
@@ -15,10 +17,12 @@ public class ResearchService {
 	@Value("${gemini.api.key}")
 	
 	private final WebClient webClient;
+	private final ObjectMapper objectMapper;
 	
 	
-	public ResearchService(WebClient.Builder webClientBuilder) {
+	public ResearchService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
 		this.webClient = webClientBuilder.build(); // This helps get instance of Web Client
+		this.objectMapper = new ObjectMapper();
 	}
 
 	public String processContent(ResearchRequest request) {
@@ -49,7 +53,22 @@ public class ResearchService {
 	
 	private String extractTextFromResponse(String response) {
 		try {
-			
+			// With ObjectMapping, the response we get in JSON format is mapped to structured Java class hierarchy in GeminiResponse class
+			GeminiResponse geminiResponse = objectMapper.readValue(response, GeminiResponse.class);
+			// Checking if there are candidates inside of GeminiReponse
+			if (geminiResponse.getCandidates() != null && !geminiResponse.getCandidates().isEmpty()) { 
+				
+				// If candidates -> set candidate to first element in List at index 0 (.get(0))
+				GeminiResponse.Candidate firstCandidate = geminiResponse.getCandidates().get(0); 
+				if (firstCandidate.getContent() != null && // If content is NOT empty
+						firstCandidate.getContent().getParts() != null && // AND if Parts in content is NOT empty
+						!firstCandidate.getContent().getParts().isEmpty() ) { // AND if !(Parts in content is empty) 
+					
+					// Return the text from first element in List
+					return firstCandidate.getContent().getParts().get(0).getText(); 
+					
+				}
+			}
 		} catch (Exception e) {
 			return "Error Parsing: " + e.getMessage();
 		}
