@@ -1,0 +1,1 @@
+The Smart Research Assistant is a full-stack application designed to improve the speed and efficiency of web research. It works as a Chrome Extension that allows users to select any block of text on a webpage and instantly generate an AI-driven summary, related topics, and formatted citations via a dedicated backend service
